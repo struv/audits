@@ -1,0 +1,195 @@
+# Audit Manager
+
+A beautiful, modern audit management application for healthcare facilities. Built with obsessive attention to detail and delightful user experience.
+
+## ✨ Features
+
+- **Intuitive Dashboard** - View all audits at a glance with real-time progress tracking
+- **Two Audit Types**:
+  - **MRR** (Medical Record Review) - 59 comprehensive checklist items
+  - **FSR** (Facility Site Review) - 136 detailed compliance checks
+- **Smart Progress Tracking** - Auto-updates audit status based on completion
+- **Calendar View** - Visual timeline of all scheduled audits
+- **Beautiful Animations** - Smooth, delightful micro-interactions throughout
+- **Mobile-First** - Fully responsive design for on-the-go auditing
+- **Offline-First** - Works completely offline with localStorage persistence
+
+## 🎨 Design Philosophy
+
+Built with the same obsessive attention to detail as Steve Jobs would demand:
+- **Every pixel matters** - Refined shadows, spacing, and typography
+- **Fluid animations** - Spring physics and natural motion
+- **Touch-optimized** - 44px minimum tap targets for mobile use
+- **Accessible** - Proper focus states and keyboard navigation
+- **Fast** - Instant feedback, no loading spinners
+
+## 🚀 Tech Stack
+
+- **React 18** + **TypeScript** - Type-safe component architecture
+- **Vite** - Lightning-fast dev server and builds
+- **Tailwind CSS** - Custom design system with refined color palette
+- **Zustand** - Minimal, fast state management
+- **Framer Motion** - Buttery smooth animations
+- **React Router** - Client-side routing
+- **react-big-calendar** - Beautiful calendar interface
+- **date-fns** - Modern date manipulation
+
+## 📦 Installation
+
+```bash
+cd audit-manager
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173)
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/
+│   ├── AuditCard.tsx      # Beautiful audit summary cards
+│   ├── AuditForm.tsx      # Modal for creating audits
+│   └── ChecklistView.tsx  # Interactive checklist with sections
+├── pages/
+│   ├── Dashboard.tsx      # Main dashboard with stats
+│   ├── AuditDetail.tsx    # Full audit view with checklist
+│   └── Calendar.tsx       # Calendar view of all audits
+├── data/
+│   └── templates/
+│       ├── mrrChecklist.ts # MRR audit template
+│       └── fsrChecklist.ts # FSR audit template
+├── lib/
+│   ├── store.ts           # Zustand state management
+│   ├── dataStore.ts       # localStorage abstraction
+│   └── utils.ts           # Helper functions
+├── types/
+│   └── index.ts           # TypeScript definitions
+└── App.tsx                # Routing & app initialization
+```
+
+## 📱 Usage
+
+### Creating an Audit
+
+1. Click **"New Audit"** on the dashboard
+2. Select a location from the dropdown
+3. Choose audit type (MRR or FSR)
+4. Pick a scheduled date
+5. Click **"Create Audit"**
+
+### Completing Checklists
+
+1. Open an audit from the dashboard
+2. Expand sections by clicking the header
+3. Tap checkboxes to mark items complete
+4. Progress updates automatically
+5. Audit status updates based on completion:
+   - **Pending** → 0% complete
+   - **In Progress** → 1-99% complete
+   - **Complete** → 100% complete
+
+### Calendar View
+
+- Click **"Calendar"** to see all audits visually
+- Blue events = MRR audits
+- Purple events = FSR audits
+- Green events = Completed audits
+- Click any event to jump to that audit
+
+## 🎯 Key Design Decisions
+
+### Why localStorage?
+
+- **Zero infrastructure** - Works immediately without backend
+- **Fast** - No network latency
+- **Private** - Data stays on user's device
+- **Migration-ready** - Schema matches future PocketBase structure
+
+### Why Zustand over Redux?
+
+- **Minimal boilerplate** - 10x less code
+- **Better performance** - Optimized re-renders
+- **Simple API** - Easy to understand and test
+- **Small bundle** - <1KB vs. Redux's ~15KB
+
+### Why Framer Motion?
+
+- **Natural physics** - Spring animations feel alive
+- **Layout animations** - Smooth transitions between states
+- **Gesture support** - Built-in swipe and drag
+- **Great DX** - Declarative API
+
+## 🔮 Future Enhancements
+
+Ready for easy migration to multi-user backend:
+
+1. **PocketBase Backend**
+   - Real-time collaboration
+   - User authentication
+   - Cloud backup
+   - Multi-device sync
+
+2. **Advanced Features**
+   - Photo attachments for checklist items
+   - Notes and annotations
+   - Export to PDF
+   - Email reports
+   - Team assignments
+
+3. **Analytics**
+   - Completion trends
+   - Location performance
+   - Time tracking
+   - Compliance scoring
+
+## 📊 Data Schema
+
+### Audit Object
+```typescript
+interface Audit {
+  id: string;
+  location: LocationId;
+  auditType: 'MRR' | 'FSR';
+  scheduledDate: string; // ISO 8601
+  status: 'pending' | 'in_progress' | 'complete';
+  checklistItems: ChecklistItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+### localStorage Keys
+- `audits` - Array of all audit objects
+- `app_metadata` - Version and last modified timestamp
+
+## 🎨 Color System
+
+- **Primary** (Blue) - MRR audits, primary actions
+- **Accent** (Purple) - FSR audits, secondary actions
+- **Success** (Green) - Completed items, positive states
+- **Warning** (Amber) - In-progress, attention needed
+- **Neutral** (Gray) - Base UI, text, borders
+
+## 🚢 Deployment
+
+### Vercel (Recommended)
+```bash
+npm install -g vercel
+vercel
+```
+
+### Build for Production
+```bash
+npm run build
+# Outputs to /dist
+```
+
+## 📝 License
+
+MIT - Built with ❤️ for healthcare professionals
+
+---
+
+**Note**: This is an MVP designed for rapid deployment. All data is stored locally. For production use with multiple users, integrate with PocketBase or similar backend.
