@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckSquare, Square, ChevronDown, ChevronRight } from 'lucide-react';
+import { CheckSquare, Square, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Audit } from '../types';
 import { useAuditStore } from '../lib/store';

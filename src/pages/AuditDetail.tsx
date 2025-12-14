@@ -8,8 +8,6 @@ import ChecklistView from '../components/ChecklistView';
 import {
   formatDate,
   getCompletionPercentage,
-  formatStatus,
-  getStatusColor,
   getAuditTypeColor,
 } from '../lib/utils';
 

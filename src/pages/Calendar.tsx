@@ -26,7 +26,12 @@ export default function CalendarPage() {
   const navigate = useNavigate();
   const audits = useAuditStore((state) => state.audits);
 
-  const events = useMemo<Event[]>(() => {
+  interface CalendarEvent extends Event {
+    id: string;
+    resource: any;
+  }
+
+  const events = useMemo<CalendarEvent[]>(() => {
     return audits.map((audit) => {
       const date = new Date(audit.scheduledDate);
       return {
@@ -140,7 +145,7 @@ export default function CalendarPage() {
               startAccessor="start"
               endAccessor="end"
               eventPropGetter={eventStyleGetter}
-              onSelectEvent={(event) => navigate(`/audit/${event.id}`)}
+              onSelectEvent={(event) => navigate(`/audit/${(event as CalendarEvent).id}`)}
               views={['month', 'week', 'day', 'agenda']}
               defaultView="month"
               popup
