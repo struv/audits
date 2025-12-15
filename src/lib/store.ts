@@ -119,8 +119,9 @@ export const useAuditStore = create<AuditStore>((set, get) => ({
       }
       return a;
     });
-    
-    set({ audits: updatedAudits });
+
+    // Force update by creating a brand new array reference
+    set({ audits: [...updatedAudits] });
     
     // #region agent log
     const afterUpdate = { auditsCount: get().audits.length, auditInStore: get().audits.find((a) => a.id === id), auditInStoreCompletedCount: get().audits.find((a) => a.id === id)?.checklistItems?.filter((item) => item.completed).length };

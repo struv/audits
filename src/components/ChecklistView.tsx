@@ -12,17 +12,41 @@ interface ChecklistViewProps {
 }
 
 export default function ChecklistView({ audit: auditProp }: ChecklistViewProps) {
-  // Subscribe to store to get live updates instead of relying on prop
-  const audits = useAuditStore((state) => state.audits);
-  const audit = audits.find((a) => a.id === auditProp.id) || auditProp;
+  // Subscribe directly to the specific audit to ensure re-renders on updates
+  const audit = useAuditStore(
+    (state) => state.audits.find((a) => a.id === auditProp.id) || auditProp
+  );
   const toggleChecklistItem = useAuditStore((state) => state.toggleChecklistItem);
-  
-  // #region agent log
+
+  // Safety check
+  if (!audit || !audit.checklistItems) {
+    console.error('Invalid audit data:', audit);
+    return <div className="p-6 text-red-600">Error: Invalid audit data</div>;
+  }
+
+  // Debug: Log every render
   const completedCount = audit.checklistItems.filter((item) => item.completed).length;
-  fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChecklistView.tsx:14',message:'ChecklistView render - with store subscription',data:{auditId:audit.id,completedCount,totalItems:audit.checklistItems.length,fromStore:audits.find((a) => a.id === auditProp.id) !== undefined,itemIds:audit.checklistItems.slice(0,5).map((item) => ({id:item.id,completed:item.completed}))},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
+  console.log('ChecklistView render:', {
+    auditId: audit.id,
+    completedCount,
+    totalItems: audit.checklistItems.length,
+    firstFiveItems: audit.checklistItems.slice(0, 5).map((item) => ({
+      id: item.id,
+      completed: item.completed
+    }))
+  });
+
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChecklistView.tsx:14',message:'ChecklistView render - with store subscription',data:{auditId:audit.id,completedCount,totalItems:audit.checklistItems.length,fromStore:true,itemIds:audit.checklistItems.slice(0,5).map((item) => ({id:item.id,completed:item.completed}))},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'F'})}).catch(()=>{});
   // #endregion
-  
+
   const template = audit.auditType === 'MRR' ? MRR_TEMPLATE : FSR_TEMPLATE;
+
+  // Safety check for template
+  if (!template) {
+    console.error('Invalid template for audit type:', audit.auditType);
+    return <div className="p-6 text-red-600">Error: Invalid audit template</div>;
+  }
 
   // Track expanded sections - start with all expanded
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -86,11 +110,9 @@ export default function ChecklistView({ audit: auditProp }: ChecklistViewProps) 
                   </h3>
                   <div className="flex items-center gap-3 mt-2">
                     <div className="progress-bar flex-1 max-w-xs">
-                      <motion.div
-                        className="progress-fill"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.5 }}
+                      <div
+                        className="progress-fill transition-all duration-300"
+                        style={{ width: `${progress}%` }}
                       />
                     </div>
                     <span className="text-sm font-medium text-neutral-600 flex-shrink-0">
@@ -135,9 +157,12 @@ export default function ChecklistView({ audit: auditProp }: ChecklistViewProps) 
                           item.completed ? 'bg-success-50/30' : ''
                         }`}
                       >
-                        <label className="flex items-start gap-4 cursor-pointer touch-target">
+                        <div className="flex items-start gap-4 touch-target">
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              console.log('Checkbox clicked:', item.id, 'Current state:', item.completed);
                               // #region agent log
                               fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ChecklistView.tsx:130',message:'ChecklistView - button click',data:{auditId:audit.id,itemId:item.id,itemCompletedBefore:item.completed},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
                               // #endregion
@@ -145,23 +170,13 @@ export default function ChecklistView({ audit: auditProp }: ChecklistViewProps) 
                             }}
                             className="mt-0.5 flex-shrink-0 touch-target"
                             type="button"
+                            aria-label={item.completed ? 'Mark as incomplete' : 'Mark as complete'}
                           >
-                            <motion.div
-                              whileTap={{ scale: 0.9 }}
-                              whileHover={{ scale: 1.05 }}
-                            >
-                              {item.completed ? (
-                                <motion.div
-                                  initial={{ scale: 0 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ type: 'spring', duration: 0.4 }}
-                                >
-                                  <CheckSquare className="h-6 w-6 text-primary-600" />
-                                </motion.div>
-                              ) : (
-                                <Square className="h-6 w-6 text-neutral-400 hover:text-primary-600 transition-colors" />
-                              )}
-                            </motion.div>
+                            {item.completed ? (
+                              <CheckSquare className="h-6 w-6 text-primary-600" />
+                            ) : (
+                              <Square className="h-6 w-6 text-neutral-400 hover:text-primary-600 transition-colors" />
+                            )}
                           </button>
 
                           <div className="flex-1 min-w-0">
@@ -180,11 +195,17 @@ export default function ChecklistView({ audit: auditProp }: ChecklistViewProps) 
                             {item.completedAt && (
                               <p className="text-xs text-success-600 mt-1">
                                 ✓ Completed{' '}
-                                {new Date(item.completedAt).toLocaleDateString()}
+                                {(() => {
+                                  try {
+                                    return new Date(item.completedAt).toLocaleDateString();
+                                  } catch (e) {
+                                    return 'recently';
+                                  }
+                                })()}
                               </p>
                             )}
                           </div>
-                        </label>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
