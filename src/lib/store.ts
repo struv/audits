@@ -36,18 +36,9 @@ export const useAuditStore = create<AuditStore>((set, get) => ({
 
   // Load audits from storage
   loadAudits: () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:38',message:'loadAudits - entry',data:{auditsCountBefore:get().audits.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     set({ isLoading: true });
     const audits = dataStore.getAudits();
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:42',message:'loadAudits - before set',data:{auditsCountFromStorage:audits.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     set({ audits, isLoading: false });
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/515cbd0a-e7df-4255-9a88-68d69ed0f6af',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'store.ts:45',message:'loadAudits - after set',data:{auditsCountAfter:get().audits.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
   },
 
   // Create a new audit

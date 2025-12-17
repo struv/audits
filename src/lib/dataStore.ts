@@ -1,4 +1,6 @@
 import type { Audit } from '../types';
+import { useLocalStorage } from './supabase';
+import { SupabaseDataStore } from './supabaseDataStore';
 
 /**
  * Data store interface - designed to mirror future PocketBase schema
@@ -98,5 +100,7 @@ export class LocalStorageDataStore implements IDataStore {
   }
 }
 
-// Export singleton instance
-export const dataStore = new LocalStorageDataStore();
+// Export singleton instance - choose between localStorage and Supabase
+export const dataStore: IDataStore = useLocalStorage()
+  ? new LocalStorageDataStore()
+  : new SupabaseDataStore();

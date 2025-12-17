@@ -12,7 +12,7 @@ A beautiful, modern audit management application for healthcare facilities. Buil
 - **Calendar View** - Visual timeline of all scheduled audits
 - **Beautiful Animations** - Smooth, delightful micro-interactions throughout
 - **Mobile-First** - Fully responsive design for on-the-go auditing
-- **Offline-First** - Works completely offline with localStorage persistence
+- **Flexible Storage** - Works offline with localStorage or cloud-synced with Supabase
 
 ## 🎨 Design Philosophy
 
@@ -43,6 +43,56 @@ npm run dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173)
+
+## 🗄️ Supabase Setup (Optional)
+
+The app works great with localStorage out of the box, but you can optionally use Supabase for cloud persistence and multi-device sync.
+
+### 1. Create a Supabase Project
+
+1. Go to [https://supabase.com](https://supabase.com) and create a free account
+2. Create a new project
+3. Go to Settings → API to get your credentials
+
+### 2. Configure Environment Variables
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Update `.env.local` with your Supabase credentials:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_USE_LOCAL_STORAGE=false  # Set to false to use Supabase
+```
+
+### 3. Run Database Migration
+
+In your Supabase project dashboard:
+
+1. Go to the SQL Editor
+2. Copy the contents of `supabase/migrations/20250101000000_create_audits_table.sql`
+3. Paste and run the SQL to create the `audits` table
+
+### 4. Start the App
+
+```bash
+npm run dev
+```
+
+The app will automatically use Supabase when properly configured. If credentials are missing or `VITE_USE_LOCAL_STORAGE=true`, it falls back to localStorage.
+
+### Switching Between localStorage and Supabase
+
+To switch back to localStorage mode, set in `.env.local`:
+
+```env
+VITE_USE_LOCAL_STORAGE=true
+```
 
 ## 🏗️ Project Structure
 
@@ -100,12 +150,13 @@ src/
 
 ## 🎯 Key Design Decisions
 
-### Why localStorage?
+### Why localStorage (with Supabase option)?
 
 - **Zero infrastructure** - Works immediately without backend
-- **Fast** - No network latency
-- **Private** - Data stays on user's device
-- **Migration-ready** - Schema matches future PocketBase structure
+- **Fast** - No network latency with localStorage
+- **Private** - Data stays on user's device (or synced to Supabase)
+- **Flexible** - Switch between localStorage and Supabase with one env variable
+- **Migration-ready** - Clean abstraction layer for easy backend swapping
 
 ### Why Zustand over Redux?
 
@@ -123,13 +174,11 @@ src/
 
 ## 🔮 Future Enhancements
 
-Ready for easy migration to multi-user backend:
-
-1. **PocketBase Backend**
-   - Real-time collaboration
-   - User authentication
-   - Cloud backup
-   - Multi-device sync
+1. **Supabase Enhancements**
+   - Real-time collaboration with live updates
+   - User authentication and multi-user support
+   - Row-level security for team access
+   - Automatic cloud backup
 
 2. **Advanced Features**
    - Photo attachments for checklist items
