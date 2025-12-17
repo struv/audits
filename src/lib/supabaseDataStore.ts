@@ -8,18 +8,6 @@ import type { IDataStore } from './dataStore';
  */
 export class SupabaseDataStore implements IDataStore {
   private cache: Audit[] = [];
-  private initialized = false;
-
-  /**
-   * Initialize cache from Supabase
-   */
-  private async initialize(): Promise<void> {
-    if (this.initialized) return;
-
-    const audits = await this.fetchAudits();
-    this.cache = audits;
-    this.initialized = true;
-  }
 
   /**
    * Fetch all audits from Supabase
@@ -80,10 +68,6 @@ export class SupabaseDataStore implements IDataStore {
    * Get all audits (synchronous, uses cache)
    */
   getAudits(): Audit[] {
-    // Trigger async initialization if needed
-    if (!this.initialized) {
-      this.initialize();
-    }
     return this.cache;
   }
 
@@ -182,6 +166,5 @@ export class SupabaseDataStore implements IDataStore {
    */
   async refresh(): Promise<void> {
     this.cache = await this.fetchAudits();
-    this.initialized = true;
   }
 }

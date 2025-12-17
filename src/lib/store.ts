@@ -11,7 +11,7 @@ interface AuditStore {
   isLoading: boolean;
 
   // Actions
-  loadAudits: () => void;
+  loadAudits: () => Promise<void>;
   createAudit: (
     location: LocationId,
     auditType: AuditType,
@@ -35,8 +35,14 @@ export const useAuditStore = create<AuditStore>((set, get) => ({
   isLoading: false,
 
   // Load audits from storage
-  loadAudits: () => {
+  loadAudits: async () => {
     set({ isLoading: true });
+
+    // Check if dataStore has a refresh method (Supabase)
+    if ('refresh' in dataStore && typeof dataStore.refresh === 'function') {
+      await dataStore.refresh();
+    }
+
     const audits = dataStore.getAudits();
     set({ audits, isLoading: false });
   },

@@ -12,6 +12,7 @@ export interface IDataStore {
   saveAudit(audit: Audit): void;
   deleteAudit(id: string): void;
   updateAudit(id: string, updates: Partial<Audit>): void;
+  refresh?(): Promise<void>; // Optional for async data stores like Supabase
 }
 
 /**
