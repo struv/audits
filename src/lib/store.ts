@@ -203,10 +203,11 @@ export const useAuditStore = create<AuditStore>((set, get) => ({
     return get().audits.find((a) => a.id === id);
   },
 
-  // Get upcoming audits (not complete, sorted by date)
+  // Get upcoming audits (scheduled today or in the future, sorted by date)
   getUpcomingAudits: () => {
+    const today = new Date().toISOString().split('T')[0];
     return get()
-      .audits.filter((a) => a.status !== 'complete')
+      .audits.filter((a) => a.scheduledDate >= today)
       .sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
   },
 
