@@ -159,13 +159,13 @@ export const useAuditStore = create<AuditStore>((set, get) => ({
     // Auto-update status based on progress
     const completedCount = updatedItems.filter((item) => item.completed).length;
     const totalCount = updatedItems.length;
-    let newStatus: AuditStatus = audit.status;
+    let newStatus: AuditStatus;
 
     if (completedCount === 0) {
       newStatus = 'pending';
     } else if (completedCount === totalCount) {
       newStatus = 'complete';
-    } else if (audit.status === 'pending') {
+    } else {
       newStatus = 'in_progress';
     }
 

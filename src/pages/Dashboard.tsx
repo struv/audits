@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Calendar as CalendarIcon, TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, TrendingUp, Clock, CheckCircle, Database, FileBarChart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuditStore } from '../lib/store';
 import AuditCard from '../components/AuditCard';
 import AuditForm from '../components/AuditForm';
+import MonthlyReportModal from '../components/MonthlyReportModal';
 
 export default function Dashboard() {
   const audits = useAuditStore((state) => state.audits);
@@ -12,10 +13,17 @@ export default function Dashboard() {
   const getAuditsByStatus = useAuditStore((state) => state.getAuditsByStatus);
 
   const [showForm, setShowForm] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const upcomingAudits = getUpcomingAudits();
   const inProgressCount = getAuditsByStatus('in_progress').length;
   const completedCount = getAuditsByStatus('complete').length;
+
+  // Get past audits (scheduled in the past, sorted by date descending)
+  const today = new Date().toISOString().split('T')[0];
+  const pastAudits = audits
+    .filter((a) => a.scheduledDate < today)
+    .sort((a, b) => b.scheduledDate.localeCompare(a.scheduledDate));
 
   // Calculate total completion percentage
   const totalItems = audits.reduce(
@@ -74,10 +82,26 @@ export default function Dashboard() {
             </div>
             <div className="flex gap-3">
               <Link
+                to="/dev"
+                className="btn btn-secondary"
+                title="Developer Tools"
+              >
+                <Database className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Dev Tools</span>
+              </Link>
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="btn btn-secondary"
+                title="Generate Monthly Report"
+              >
+                <FileBarChart className="h-5 w-5 sm:mr-2" />
+                <span className="hidden sm:inline">Report</span>
+              </button>
+              <Link
                 to="/calendar"
                 className="btn btn-secondary"
               >
-                <CalendarIcon className="h-5 w-5 mr-2" />
+                <CalendarIcon className="h-5 w-5 sm:mr-2" />
                 <span className="hidden sm:inline">Calendar</span>
               </Link>
               <button onClick={() => setShowForm(true)} className="btn btn-primary">
@@ -149,54 +173,76 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* Audit List */}
-        <div>
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl font-bold text-neutral-900 mb-6"
+        {/* Audit Lists */}
+        {audits.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+            className="card text-center py-16"
           >
-            {upcomingAudits.length > 0 ? 'Upcoming Audits' : 'Recent Audits'}
-          </motion.h2>
-
-          {audits.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-              className="card text-center py-16"
-            >
-              <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Plus className="h-8 w-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                  No audits yet
-                </h3>
-                <p className="text-neutral-600 mb-6">
-                  Get started by creating your first audit
-                </p>
-                <button onClick={() => setShowForm(true)} className="btn btn-primary">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Create First Audit
-                </button>
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Plus className="h-8 w-8 text-primary-600" />
               </div>
-            </motion.div>
-          ) : (
-            <div className="space-y-4">
-              {(upcomingAudits.length > 0 ? upcomingAudits : audits).map(
-                (audit, index) => (
-                  <AuditCard key={audit.id} audit={audit} index={index} />
-                )
-              )}
+              <h3 className="text-xl font-semibold text-neutral-900 mb-2">
+                No audits yet
+              </h3>
+              <p className="text-neutral-600 mb-6">
+                Get started by creating your first audit
+              </p>
+              <button onClick={() => setShowForm(true)} className="btn btn-primary">
+                <Plus className="h-5 w-5 mr-2" />
+                Create First Audit
+              </button>
             </div>
-          )}
-        </div>
+          </motion.div>
+        ) : (
+          <div className="space-y-8">
+            {/* Upcoming Audits */}
+            {upcomingAudits.length > 0 && (
+              <div>
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-xl font-bold text-neutral-900 mb-6"
+                >
+                  Upcoming Audits
+                </motion.h2>
+                <div className="space-y-4">
+                  {upcomingAudits.map((audit, index) => (
+                    <AuditCard key={audit.id} audit={audit} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Past Audits */}
+            {pastAudits.length > 0 && (
+              <div>
+                <motion.h2
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-xl font-bold text-neutral-900 mb-6"
+                >
+                  Past Audits
+                </motion.h2>
+                <div className="space-y-4">
+                  {pastAudits.map((audit, index) => (
+                    <AuditCard key={audit.id} audit={audit} index={index} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       {showForm && <AuditForm onClose={() => setShowForm(false)} />}
+      {showReportModal && <MonthlyReportModal onClose={() => setShowReportModal(false)} />}
     </div>
   );
 }

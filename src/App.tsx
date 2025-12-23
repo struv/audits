@@ -4,6 +4,7 @@ import { useAuditStore } from './lib/store';
 import Dashboard from './pages/Dashboard';
 import AuditDetail from './pages/AuditDetail';
 import CalendarPage from './pages/Calendar';
+import DevTools from './pages/DevTools';
 
 export default function App() {
   const loadAudits = useAuditStore((state) => state.loadAudits);
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/audit/:id" element={<AuditDetail />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/dev" element={<DevTools />} />
       </Routes>
     </BrowserRouter>
   );
