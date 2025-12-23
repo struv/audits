@@ -5,7 +5,10 @@
       "mcp__ide__getDiagnostics",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(start http://localhost:5174/dev)"
     ]
   }
 }
